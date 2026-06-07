@@ -7,9 +7,17 @@ import {
   ChevronRight, Check, X, Image as ImageIcon, Link as LinkIcon,
   Tag, FolderOpen, Loader2, ArrowRight, Eye, Edit3, ThumbsUp,
   ThumbsDown, RotateCcw, ExternalLink,
+import { 
+  Image as ImageIcon, 
+  Search, 
+  Wand2, 
+  Check, 
+  Facebook, 
+  Instagram,
+  // Add any other lucide icons that were in your first import block here
 } from "lucide-react";
+
 import { articles, sites, lifecycleStages, freeStockImages, aiGeneratedImages } from "@/lib/mock-data";
-import { Image as ImageIcon, Search, Wand2, Check, Facebook, Instagram } from "lucide-react";
 
 type StatusFilter = "all" | "pending_review" | "needs_changes" | "approved";
 
