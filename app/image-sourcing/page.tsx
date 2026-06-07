@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { imageSourceConfigs, aiGeneratedImages, freeStockImages } from "@/lib/mockdata";
+// FIXED: Path changed from @/lib/mockdata to @/lib/mock-data to match Vercel's case-sensitive environment
+import { imageSourceConfigs, aiGeneratedImages, freeStockImages } from "@/lib/mock-data";
 
 export default function ImageSourcingPage() {
   const [activeTab, setActiveTab] = useState<"ai" | "stock">("ai");
