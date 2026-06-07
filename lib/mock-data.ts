@@ -201,7 +201,8 @@ export const mediaItems = Array.from({ length: 32 }, (_, i) => ({
   usageCount: Math.floor(Math.random() * 8),
   fileSize: `${(0.5 + Math.random() * 4).toFixed(1)} MB`,
   dimensions: ["1920x1080", "1600x900", "2048x1365", "1200x800"][i % 4],
-  source: (["uploaded", "free-stock", "ai-generated"] as const)[i % 3],
+  // FIXED: Converted from runtime array index 'as const' to string literal union assertion
+  source: ["uploaded", "free-stock", "ai-generated"][i % 3] as "uploaded" | "free-stock" | "ai-generated",
 }));
 
 // ===================== ACTIVITY FEED =====================
@@ -246,7 +247,8 @@ export const calendarEvents = Array.from({ length: 28 }, (_, i) => {
     siteName: site.name,
     date: `2024-06-${String(day).padStart(2, "0")}`,
     time: `${String(hour).padStart(2, "0")}:00`,
-    status: ["scheduled", "published", "draft"][i % 3] as const,
+    // FIXED: Converted from runtime array index 'as const' to string literal union assertion
+    status: ["scheduled", "published", "draft"][i % 3] as "scheduled" | "published" | "draft",
     articleId: article.id,
   };
 });
