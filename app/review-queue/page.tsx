@@ -7,7 +7,7 @@ import {
   ChevronRight, Check, X, Image as ImageIcon, Link as LinkIcon,
   Tag, FolderOpen, Loader2, ArrowRight, Eye, Edit3, ThumbsUp,
   ThumbsDown, RotateCcw, ExternalLink, Search, Wand2, Facebook, 
-  Instagram, ClipboardList
+  Instagram, ClipboardList, Sparkles
 } from "lucide-react";
 
 import { articles, sites, lifecycleStages, freeStockImages, aiGeneratedImages } from "@/lib/mock-data";
