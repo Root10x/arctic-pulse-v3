@@ -7,6 +7,7 @@ import {
   ChevronRight, Check, X, Image as ImageIcon, Link as LinkIcon,
   Tag, FolderOpen, Loader2, ArrowRight, Eye, Edit3, ThumbsUp,
   ThumbsDown, RotateCcw, ExternalLink, Search, Wand2, Facebook, Instagram
+  ClipboardList
 } from "lucide-react";
 
 import { articles, sites, lifecycleStages, freeStockImages, aiGeneratedImages } from "@/lib/mock-data";
@@ -318,7 +319,7 @@ export default function ReviewQueuePage() {
           ) : (
             <div className="flex-1 flex items-center justify-center text-center p-8">
               <div>
-                <ClipboardPaste className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                <ClipboardList className="w-12 h-12 text-slate-200 mx-auto mb-3" />
                 <p className="text-sm text-slate-400">Select an article to review</p>
               </div>
             </div>
