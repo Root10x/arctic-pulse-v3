@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronRight, ChevronLeft, FileText, Globe, Calendar, Image as ImageIcon,
-  MessageSquare, Check, Sparkles, Loader2, Clock, Send, Eye, Search
+  MessageSquare, Check, Sparkles, Loader2, Send, Eye, Search, Link2, AlertCircle
 } from "lucide-react";
 import { sites, freeStockImages, aiGeneratedImages } from "@/lib/mock-data";
 import { SocialTeaserPreview } from "@/components/social-teaser";
@@ -15,7 +15,7 @@ const steps = [
   { id: "schedule", label: "Schedule", icon: Calendar },
   { id: "image", label: "Image Pool", icon: ImageIcon },
   { id: "social", label: "Social Teasers", icon: MessageSquare },
-  { id: "preview", label: "Final Preview", icon: Eye },
+  { id: "preview", label: "Final Preview & Links", icon: Eye },
 ];
 
 export default function ContentWizardPage() {
@@ -35,6 +35,17 @@ export default function ContentWizardPage() {
   const [socialEnabled, setSocialEnabled] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [draft, setDraft] = useState<any>(null);
+
+  // Cross-Network Internal Link Sync States
+  const [suggestedLinks, setSuggestedLinks] = useState([
+    { id: "lnk1", anchor: "Arctic Council", targetSite: "Greenland Review", targetUrl: "greenlandreview.gl/policy/arctic-council-overview", active: true },
+    { id: "lnk2", anchor: "shipping regulations", targetSite: "Nordic Current", targetUrl: "nordiccurrent.is/operations/maritime-laws", active: true },
+    { id: "lnk3", anchor: "Tromsø", targetSite: "Norway Review", targetUrl: "norwayreview.no/hubs/tromso-transit", active: false }
+  ]);
+
+  const toggleLink = (id: string) => {
+    setSuggestedLinks(links => links.map(l => l.id === id ? { ...l, active: !l.active } : l));
+  };
 
   // Filter media pools interactively based on keyword search input
   const filteredAiImages = aiGeneratedImages.filter(img => 
@@ -77,7 +88,7 @@ export default function ContentWizardPage() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g., Arctic Council Shipping Regulations Update"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-teal-500 text-sm"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600/20 text-sm"
               />
             </div>
             <div>
@@ -87,12 +98,12 @@ export default function ContentWizardPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add key points, angles, or source URLs..."
                 rows={4}
-                className="w-full mt-1 p-3 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:border-teal-500 text-sm font-sans resize-none"
+                className="w-full mt-1 p-3 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600/20 text-sm font-sans resize-none"
               />
             </div>
-            <div className="p-3 bg-teal-50/60 rounded-lg border border-teal-100">
-              <p className="text-xs text-teal-800 leading-relaxed">
-                The engine will reference this workspace state to assemble contextual records and match background visuals dynamically.
+            <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
+              <p className="text-xs text-green-800 leading-relaxed">
+                The engine will reference this workspace state to assemble contextual records, scan cross-network internal linking maps, and match background visuals dynamically.
               </p>
             </div>
           </div>
@@ -110,16 +121,18 @@ export default function ContentWizardPage() {
                   onClick={() => setTargetSite(site.id)}
                   className={`p-4 rounded-xl border text-left transition-all ${
                     targetSite === site.id
-                      ? "border-teal-600 bg-teal-50/20 shadow-sm"
+                      ? "border-green-600 bg-green-50/20 shadow-sm"
                       : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-sm font-bold text-slate-600 shrink-0">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
+                      targetSite === site.id ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
+                    }`}>
                       {site.logo}
                     </div>
                     <div>
-                      <p className={`text-sm font-semibold ${targetSite === site.id ? "text-teal-700" : "text-slate-900"}`}>
+                      <p className={`text-sm font-semibold ${targetSite === site.id ? "text-green-800" : "text-slate-900"}`}>
                         {site.name}
                       </p>
                       <p className="text-xs text-slate-400 mt-0.5">{site.url}</p>
@@ -141,7 +154,7 @@ export default function ContentWizardPage() {
                   type="date"
                   value={publishDate}
                   onChange={(e) => setPublishDate(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-slate-700 text-sm focus:outline-none focus:border-teal-500 bg-white"
+                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-slate-700 text-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600/20 bg-white"
                 />
               </div>
               <div>
@@ -150,12 +163,12 @@ export default function ContentWizardPage() {
                   type="time"
                   value={publishTime}
                   onChange={(e) => setPublishTime(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-slate-700 text-sm focus:outline-none focus:border-teal-500 bg-white"
+                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-slate-700 text-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600/20 bg-white"
                 />
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <input type="checkbox" id="draft-review" className="rounded border-slate-300 text-teal-600 focus:ring-teal-500" defaultChecked />
+              <input type="checkbox" id="draft-review" className="rounded border-slate-300 text-green-600 focus:ring-green-500" defaultChecked />
               <label htmlFor="draft-review" className="text-xs text-slate-600 font-medium">Send to editorial review queue before final live sync</label>
             </div>
           </div>
@@ -164,14 +177,13 @@ export default function ContentWizardPage() {
       case "image":
         return (
           <div className="space-y-4">
-            {/* Inline Sub-tabs selector controls */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-3">
               <div className="flex border border-slate-200 rounded-lg p-0.5 bg-slate-100 w-fit shrink-0">
                 <button
                   type="button"
                   onClick={() => setMediaTab("ai")}
                   className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                    mediaTab === "ai" ? "bg-white text-teal-600 shadow-sm" : "text-slate-500"
+                    mediaTab === "ai" ? "bg-white text-green-700 shadow-sm" : "text-slate-500"
                   }`}
                 >
                   AI Generated Sandbox
@@ -180,14 +192,13 @@ export default function ContentWizardPage() {
                   type="button"
                   onClick={() => setMediaTab("stock")}
                   className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                    mediaTab === "stock" ? "bg-white text-teal-600 shadow-sm" : "text-slate-500"
+                    mediaTab === "stock" ? "bg-white text-green-700 shadow-sm" : "text-slate-500"
                   }`}
                 >
                   Free Stock Pool
                 </button>
               </div>
 
-              {/* Inline Search Bar Filter */}
               <div className="relative w-full sm:max-w-xs">
                 <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-400" />
                 <input 
@@ -195,12 +206,11 @@ export default function ContentWizardPage() {
                   placeholder="Search media pool..."
                   value={mediaSearch}
                   onChange={(e) => setMediaSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 border border-slate-200 bg-slate-50 rounded-lg focus:outline-none focus:border-teal-500 text-xs text-slate-700"
+                  className="w-full pl-8 pr-3 py-1.5 border border-slate-200 bg-slate-50 rounded-lg focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600/20 text-xs text-slate-700"
                 />
               </div>
             </div>
 
-            {/* Dynamic Sourcing Grid rendering */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-1">
               {mediaTab === "ai" ? (
                 filteredAiImages.map((img) => {
@@ -211,7 +221,7 @@ export default function ContentWizardPage() {
                       key={img.id}
                       onClick={() => setSelectedImageUrl(img.url)}
                       className={`relative rounded-xl overflow-hidden border-2 text-left bg-slate-50 group flex flex-col justify-between transition-all ${
-                        isSelected ? "border-teal-600 ring-2 ring-teal-600/10" : "border-slate-200 hover:border-slate-300"
+                        isSelected ? "border-green-600 ring-2 ring-green-600/10" : "border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       <img src={img.thumbnail} alt="" className="w-full h-28 object-cover" />
@@ -220,7 +230,7 @@ export default function ContentWizardPage() {
                         <p className="text-[10px] text-slate-400 italic line-clamp-1 mt-0.5">"{img.prompt}"</p>
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-5 h-5 bg-teal-600 rounded-full flex items-center justify-center shadow">
+                        <div className="absolute top-2 right-2 w-5 h-5 bg-green-600 rounded-full flex items-center justify-center shadow">
                           <Check className="w-3 h-3 text-white stroke-[3]" />
                         </div>
                       )}
@@ -236,7 +246,7 @@ export default function ContentWizardPage() {
                       key={img.id}
                       onClick={() => setSelectedImageUrl(img.url)}
                       className={`relative rounded-xl overflow-hidden border-2 text-left bg-slate-50 group flex flex-col justify-between transition-all ${
-                        isSelected ? "border-teal-600 ring-2 ring-teal-600/10" : "border-slate-200 hover:border-slate-300"
+                        isSelected ? "border-green-600 ring-2 ring-green-600/10" : "border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       <img src={img.thumbnail} alt="" className="w-full h-28 object-cover" />
@@ -245,7 +255,7 @@ export default function ContentWizardPage() {
                         <span className="font-mono bg-slate-100 text-slate-500 px-1 rounded text-[9px] uppercase">{img.credit}</span>
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-5 h-5 bg-teal-600 rounded-full flex items-center justify-center shadow">
+                        <div className="absolute top-2 right-2 w-5 h-5 bg-green-600 rounded-full flex items-center justify-center shadow">
                           <Check className="w-3 h-3 text-white stroke-[3]" />
                         </div>
                       )}
@@ -266,7 +276,7 @@ export default function ContentWizardPage() {
                 id="social-toggle"
                 checked={socialEnabled}
                 onChange={(e) => setSocialEnabled(e.target.checked)}
-                className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                className="rounded border-slate-300 text-green-600 focus:ring-green-500"
               />
               <label htmlFor="social-toggle" className="text-xs text-slate-700 font-semibold">
                 Auto-generate cross-network promotional teaser updates
@@ -290,20 +300,61 @@ export default function ContentWizardPage() {
 
       case "preview":
         return (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {isGenerating ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="w-7 h-7 text-teal-600 animate-spin mb-2" />
+                <Loader2 className="w-7 h-7 text-green-600 animate-spin mb-2" />
                 <p className="text-xs text-slate-500 font-medium">Parsing data layers and synthesizing draft summary...</p>
               </div>
             ) : draft ? (
               <div className="space-y-4 text-left">
+                {/* Main Content Card Preview */}
                 <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-2">
-                  <span className="px-2 py-0.5 bg-teal-50 border border-teal-100 text-teal-700 text-[10px] font-bold rounded">
+                  <span className="px-2 py-0.5 bg-green-50 border border-green-100 text-green-700 text-[10px] font-bold rounded">
                     {draft.category}
                   </span>
                   <h3 className="text-base font-bold text-slate-900 mt-1">{draft.title}</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">{draft.excerpt}</p>
+                </div>
+
+                {/* Network Internal Linking Sync Module */}
+                <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <div className="flex items-center gap-1.5 text-slate-800">
+                      <Link2 className="w-4 h-4 text-green-600" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Cross-Network Linking Matrix</h4>
+                    </div>
+                    <span className="text-[10px] bg-green-50 border border-green-100 text-green-700 px-1.5 py-0.5 font-bold rounded">
+                      {suggestedLinks.filter(l => l.active).length} Signal Links Ready
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    We mapped your core content structure against published networks. Toggle target context links to bind anchors securely:
+                  </p>
+                  
+                  <div className="space-y-2 pt-1">
+                    {suggestedLinks.map(link => (
+                      <div key={link.id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-xs">
+                        <div className="truncate pr-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-slate-800 bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-[11px]">
+                              "{link.anchor}"
+                            </span>
+                            <span className="text-[10px] bg-slate-200 text-slate-600 font-mono px-1 rounded uppercase tracking-wide">
+                              {link.targetSite}
+                            </span>
+                          </div>
+                          <p className="font-mono text-slate-400 text-[10px] truncate">{link.targetUrl}</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={link.active}
+                          onChange={() => toggleLink(link.id)}
+                          className="rounded border-slate-300 text-green-600 focus:ring-green-500 shrink-0 h-4 w-4"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
@@ -326,7 +377,7 @@ export default function ContentWizardPage() {
               </div>
             ) : (
               <div className="text-center py-6">
-                <button type="button" onClick={handleGenerate} className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-2 mx-auto">
+                <button type="button" onClick={handleGenerate} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-2 mx-auto">
                   <Sparkles className="w-4 h-4" /> Synthesize and Preview Draft
                 </button>
               </div>
@@ -354,10 +405,10 @@ export default function ContentWizardPage() {
           const isCurrent = i === currentStep;
           return (
             <div key={step.id} className="flex items-center flex-1 min-w-[75px]">
-              <div className={`flex flex-col items-center flex-1 ${isPassed || isCurrent ? "opacity-100" : "opacity-45"}`}>
+              <div className={`flex flex-col items-center flex-1 transition-opacity duration-200 ${isPassed || isCurrent ? "opacity-100" : "opacity-45"}`}>
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all ${
                   isPassed ? "bg-emerald-600 text-white shadow-sm" :
-                  isCurrent ? "bg-teal-600 text-white shadow-sm ring-4 ring-teal-50" :
+                  isCurrent ? "bg-green-600 text-white shadow-sm ring-4 ring-green-50" :
                   "bg-slate-100 text-slate-500 border border-slate-200"
                 }`}>
                   {isPassed ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Icon className="w-3.5 h-3.5" />}
@@ -391,7 +442,7 @@ export default function ContentWizardPage() {
           <button
             type="button"
             onClick={() => setCurrentStep(s => Math.min(steps.length - 1, s + 1))}
-            className="px-3 py-1.5 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-1"
+            className="px-3 py-1.5 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-1"
           >
             Next <ChevronRight className="w-3.5 h-3.5" />
           </button>
@@ -400,7 +451,7 @@ export default function ContentWizardPage() {
             type="button"
             onClick={handleSubmit}
             disabled={!draft}
-            className="px-4 py-1.5 text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-sm disabled:opacity-40 transition-colors flex items-center gap-1.5"
+            className="px-4 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm disabled:opacity-40 transition-colors flex items-center gap-1.5"
           >
             <Send className="w-3.5 h-3.5" /> Queue for Sync
           </button>
