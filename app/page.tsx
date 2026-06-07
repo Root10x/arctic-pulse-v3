@@ -73,10 +73,10 @@ export default function DashboardPage() {
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Articles", value: totalArticles, icon: FileText, change: "+8 this week", trend: "up" as const },
-          { label: "Published", value: publishedCount, icon: CheckCircle2, change: "+3 today", trend: "up" as const },
-          { label: "Pending Review", value: pendingCount, icon: Clock, change: "Needs attention", trend: "neutral" as const },
-          { label: "Scheduled", value: scheduledCount, icon: Calendar, change: "Next 7 days", trend: "up" as const },
+          { label: "Total Articles", value: totalArticles, icon: FileText, change: "+8 this week", trend: "up" as "up" | "neutral" | "down" },
+          { label: "Published", value: publishedCount, icon: CheckCircle2, change: "+3 today", trend: "up" as "up" | "neutral" | "down" },
+          { label: "Pending Review", value: pendingCount, icon: Clock, change: "Needs attention", trend: "neutral" as "up" | "neutral" | "down" },
+          { label: "Scheduled", value: scheduledCount, icon: Calendar, change: "Next 7 days", trend: "up" as "up" | "neutral" | "down" },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
