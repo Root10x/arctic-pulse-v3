@@ -14,10 +14,10 @@ import {
 } from "@/lib/mock-data";
 
 const tabs = [
-  { id: "topics", label: "Research Topics", icon: Brain, count: researchTopics.length },
-  { id: "sources", label: "Sources", icon: Layers, count: researchSources.length },
-  { id: "monitored", label: "Monitored", icon: Eye, count: monitoredArticles.length },
-  { id: "generated", label: "Generated", icon: Sparkles, count: generatedTopics.length },
+  { id: "topics", label: "Trending Topics", icon: Brain, count: researchTopics.length },
+  { id: "sources", label: "News Feeds & Sites", icon: Layers, count: researchSources.length },
+  { id: "monitored", label: "Monitored Updates", icon: Eye, count: monitoredArticles.length },
+  { id: "generated", label: "Content Suggestions", icon: Sparkles, count: generatedTopics.length },
 ];
 
 export default function ResearchPage() {
@@ -71,21 +71,21 @@ export default function ResearchPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Arctic Engine OS: Intelligence Workspace</h1>
-          <p className="text-slate-500 text-sm mt-1">Multi-market ingestion clustering, automated attribution extraction, and social previews.</p>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Newsroom & Research Hub</h1>
+          <p className="text-slate-500 text-sm mt-1">Scan active news feeds, extract factual summaries, and preview promotional posts.</p>
         </div>
         <button onClick={() => setShowCreateModal(true)} className="btn-primary flex items-center gap-2 shadow-sm bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
-          <Plus className="w-4 h-4" /> New Track Vector
+          <Plus className="w-4 h-4" /> Track New Topic
         </button>
       </div>
 
       {/* Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Tracked Vectors", value: researchTopics.length, icon: Brain, color: "bg-blue-50 text-blue-600" },
-          { label: "Active Feeds Monitored", value: researchSources.length, icon: Layers, color: "bg-emerald-50 text-emerald-600" },
-          { label: "Change Logs Checked", value: monitoredArticles.length, icon: Eye, color: "bg-amber-50 text-amber-600" },
-          { label: "Synthesized Briefs", value: generatedTopics.length, icon: Sparkles, color: "bg-purple-50 text-purple-600" },
+          { label: "Trending Topics Found", value: researchTopics.length, icon: Brain, color: "bg-blue-50 text-blue-600" },
+          { label: "Connected News Feeds", value: researchSources.length, icon: Layers, color: "bg-emerald-50 text-emerald-600" },
+          { label: "Articles Scanned", value: monitoredArticles.length, icon: Eye, color: "bg-amber-50 text-amber-600" },
+          { label: "Story Ideas Generated", value: generatedTopics.length, icon: Sparkles, color: "bg-purple-50 text-purple-600" },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -132,7 +132,7 @@ export default function ResearchPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter discovery matrix..."
+            placeholder="Search research..."
             className="w-full pl-9 pr-4 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10"
           />
         </div>
@@ -160,8 +160,8 @@ export default function ResearchPage() {
                   </div>
                   <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{topic.contextSummary}</p>
                   <div className="flex items-center gap-4 mt-3 pt-2 border-t border-slate-50 text-[11px] font-medium text-slate-400">
-                    <span className="flex items-center gap-1 text-slate-600"><Globe className="w-3 h-3"/> {topic.suggestedSite}</span>
-                    <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{topic.confidence}% Extraction Confidence</span>
+                    <span className="flex items-center gap-1 text-slate-600"><Globe className="w-3 h-3"/> For Site: {topic.suggestedSite}</span>
+                    <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{topic.confidence}% Info Accuracy</span>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0 mt-2" />
@@ -175,7 +175,7 @@ export default function ResearchPage() {
               <>
                 <div className="flex justify-between items-start border-b border-slate-100 pb-3.5">
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Verification Engine</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selected Trend Details</span>
                     <h3 className="text-base font-bold text-slate-900 mt-0.5 leading-snug">{selectedTopic.title}</h3>
                   </div>
                   <button 
@@ -187,9 +187,9 @@ export default function ResearchPage() {
                     }`}
                   >
                     {simulatedExport === selectedTopic.id ? (
-                      <>⚡ Staged to Wizard!</>
+                      <>⚡ Sent to Content Wizard!</>
                     ) : (
-                      <><Send className="w-3 h-3" /> Stage Pipeline Brief</>
+                      <><Send className="w-3 h-3" /> Send to Content Wizard</>
                     )}
                   </button>
                 </div>
@@ -198,14 +198,14 @@ export default function ResearchPage() {
                 <div className="space-y-2 bg-slate-950 p-4 rounded-xl text-slate-200">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 uppercase tracking-wider">
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Clean Factual Extractors (De-risked Asset)</span>
+                    <span>Verified Story Facts (Copyright Safe)</span>
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed italic border-b border-slate-800 pb-2 mb-2">
-                    "System parsing logs: Content transformed from targeted arrays into raw metrics. No original sentence layouts retained." 
+                    "System check: The following facts have been compiled and verified from local announcements. Original phrasing and text have been removed to avoid copyright issues."
                   </p>
                   <div className="space-y-1.5 text-xs text-slate-300">
-                    <p className="flex items-start gap-1.5 font-medium"><span className="text-slate-500">•</span> Sourced Targeting Anchor: {selectedTopic.angle}</p>
-                    <p className="flex items-start gap-1.5 font-medium"><span className="text-slate-500">•</span> Verification Anchors: Checked across {selectedTopic.sourceCount} primary network clusters[cite: 281].</p>
+                    <p className="flex items-start gap-1.5 font-medium"><span className="text-slate-500">•</span> Story Angle: {selectedTopic.angle}</p>
+                    <p className="flex items-start gap-1.5 font-medium"><span className="text-slate-500">•</span> Coverage Cross-checked: Found across {selectedTopic.sourceCount} different news sources.</p>
                   </div>
                   <div className="pt-2 mt-2 border-t border-slate-800 text-[10px] font-mono text-slate-500 flex flex-wrap gap-1.5">
                     {selectedTopic.sources.map((s, i) => (
@@ -219,27 +219,27 @@ export default function ResearchPage() {
                 {/* Social Teaser Platform Overrides Mock Panels */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                    <Hash className="w-3.5 h-3.5" /> Multi-Channel Promotional Outlines
+                    <Hash className="w-3.5 h-3.5" /> Social Media Previews
                   </h4>
                   
                   <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1.5">
                     <div className="flex items-center gap-1 text-[11px] font-bold text-blue-600">
-                      <Facebook className="w-3.5 h-3.5 fill-current" /> Facebook Dynamic Post Anchor [cite: 335]
+                      <Facebook className="w-3.5 h-3.5 fill-current" /> Facebook Post Draft
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      📢 <strong>Intelligence Alert:</strong> New strategic data tracking confirms emerging developments regarding <em>"{selectedTopic.title}"</em>. Read the complete localized deep dive on our cluster matrix. Links matching verification loops attached. [cite: 306, 336]
+                      📢 <strong>News Update:</strong> New updates are coming out regarding <em>"{selectedTopic.title}"</em>. Read our full story breakout and analysis at the link below.
                     </p>
                   </div>
 
                   <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1.5">
                     <div className="flex items-center gap-1 text-[11px] font-bold text-pink-600">
-                      <Instagram className="w-3.5 h-3.5" /> Instagram Content Engine Post [cite: 335]
+                      <Instagram className="w-3.5 h-3.5" /> Instagram Post Draft
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      High-impact data trends are landing across the high Arctic ecosystem. Complete breakdown of metrics available now. 🌍 Link in profile bio. [cite: 306, 336]
+                      Major trends are reshaping travel in the Arctic. Check out the full breakdown on our site. 🌍 Link in bio.
                     </p>
                     <p className="text-[10px] font-semibold text-slate-400 font-mono">
-                      #NordicIntelligence #DataOps #{selectedTopic.category.replace(/\s+/g, '')} [cite: 337]
+                      #NordicNews #TravelUpdate #{selectedTopic.category.replace(/\s+/g, '')}
                     </p>
                   </div>
                 </div>
@@ -247,7 +247,7 @@ export default function ResearchPage() {
             ) : (
               <div className="text-center py-12">
                 <Brain className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-xs text-slate-400 font-medium">Select an active tracking vector matrix node</p>
+                <p className="text-xs text-slate-400 font-medium">Select a topic from the list to view facts</p>
               </div>
             )}
           </div>
@@ -256,36 +256,100 @@ export default function ResearchPage() {
 
       {/* TAB: Sources (Telemetry Check & Feeds View) */}
       {activeTab === "sources" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Approved Monitoring Array (RSS / Alerts) [cite: 281]</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Automated cron loops polling data streams cleanly without scraping protected text blocks[cite: 289].</p>
-            </div>
-            <div className="space-y-2.5">
-              {monitoredSources.map((source) => (
-                <div key={source.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/40">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      {source.type === "feed" ? <Rss className="w-4 h-4 text-slate-600" /> : <Globe className="w-4 h-4 text-slate-600" />}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-900 truncate">{source.name}</p>
-                      <p className="text-[11px] text-slate-400">Yield: {source.articlesFound} historical footprints · Checked {source.lastScan} [cite: 417]</p>
-                    </div>
-                  </div>
-                  <span className="bg-emerald-100 text-emerald-800 text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md">
-                    Polling Active
-                  </span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Sub-Column: Add New Feeds & Source Ingestion Control */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Interactive Input Block for Non-Technical Users */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+                  <Plus className="w-4 h-4 text-slate-700" /> Connect News Feed or Website
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">Add an RSS link, news site URL, or Google News keyword to start monitoring it.</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Feed Name / Label</label>
+                  <input type="text" placeholder="e.g., Local Iceland Safety Alerts" className="w-full mt-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-800" />
                 </div>
-              ))}
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Feed URL or Search Phrase</label>
+                  <div className="relative mt-1">
+                    <LinkIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <input type="text" placeholder="https://example.com/rss or 'Svalbard travel'" className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-800" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Source Type</label>
+                    <select className="w-full mt-1 px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs bg-white text-slate-700 font-medium focus:outline-none">
+                      <option>Standard RSS Feed</option>
+                      <option>Google News Search</option>
+                      <option>Official Government Website</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Check Frequency</label>
+                    <select className="w-full mt-1 px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs bg-white text-slate-700 font-medium focus:outline-none">
+                      <option>Every hour (Recommended)</option>
+                      <option>Every 15 minutes</option>
+                      <option>Once a day</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => handleTriggerHandoff('new_source')}
+                  className={`w-full py-2 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 ${
+                    simulatedExport === 'new_source'
+                      ? 'bg-emerald-600 text-white' 
+                      : 'bg-slate-900 hover:bg-slate-800 text-white'
+                  }`}
+                >
+                  {simulatedExport === 'new_source' ? (
+                    <>✔ Source Connected & Active!</>
+                  ) : (
+                    <><Plus className="w-3.5 h-3.5" /> Start Monitoring Feed</>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Existing Monitored List */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Currently Monitored Feeds</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Sites and feeds the system currently checks for news updates.</p>
+              </div>
+              <div className="space-y-2.5">
+                {monitoredSources.map((source) => (
+                  <div key={source.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/40">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        {source.type === "feed" ? <Rss className="w-4 h-4 text-slate-600" /> : <Globe className="w-4 h-4 text-slate-600" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 truncate">{source.name}</p>
+                        <p className="text-[11px] text-slate-400 font-medium">Found: {source.articlesFound} stories · Last checked {source.lastScan}</p>
+                      </div>
+                    </div>
+                    <span className="bg-emerald-50 text-emerald-700 text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border border-emerald-200">
+                      Connected
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+          {/* Right Sub-Column: Extracted Material Ledger */}
+          <div className="lg:col-span-7 bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4 h-fit">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Extracted Entities Ledger</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Raw unstructured documents analyzed for key metrics and trend clustering data.</p>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Recent Articles Scanned</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Individual articles found during recent feed checks, indexed for fact-checking.</p>
             </div>
             <div className="space-y-3">
               {filteredSources.map((source) => (
@@ -293,9 +357,9 @@ export default function ResearchPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-xs font-bold text-slate-900">{source.title}</p>
-                      <p className="text-[10px] text-slate-400 font-medium">{source.siteName} · Indexed parameters</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{source.siteName} · Scan Complete</p>
                     </div>
-                    <span className="bg-slate-100 text-slate-700 text-[9px] uppercase font-mono px-2 py-0.5 rounded font-bold">Parsed</span>
+                    <span className="bg-slate-100 text-slate-700 text-[9px] uppercase px-2 py-0.5 rounded font-bold border border-slate-200">Indexed</span>
                   </div>
                   <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 bg-slate-50 p-2 rounded border border-slate-100">
                     {source.summary}
@@ -322,11 +386,11 @@ export default function ResearchPage() {
                       <h3 className="text-xs font-bold text-slate-900">{article.title}</h3>
                       {article.changeDetected && (
                         <span className="text-[9px] bg-red-50 text-red-700 font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                          Delta Identified
+                          Page Updated
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">{article.source} · Verification checkpoint: {article.lastChecked} [cite: 428]</p>
+                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">From: {article.source} · Checked {article.lastChecked}</p>
                   </div>
                 </div>
               </div>
@@ -354,9 +418,9 @@ export default function ResearchPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 justify-between">
                     <h3 className="text-sm font-semibold text-slate-900 truncate pr-2">{topic.title}</h3>
-                    <span className="text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-50 text-amber-800">{topic.urgency} triage Priority</span>
+                    <span className="text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-50 text-amber-800">{topic.urgency} Priority</span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-1 italic font-medium">"{topic.excerpt}" [cite: 439]</p>
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-1 italic font-medium">"{topic.excerpt}"</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0 mt-2" />
               </button>
@@ -368,41 +432,41 @@ export default function ResearchPage() {
             {selectedGenerated ? (
               <>
                 <div className="border-b border-slate-100 pb-3">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Asset Engine Rules Blueprint</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image Selection Settings</span>
                   <h3 className="text-base font-bold text-slate-900 mt-0.5 leading-snug">{selectedGenerated.title}</h3>
                 </div>
 
                 {/* Free Stock First Visual Proof Logic */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                    <span className="flex items-center gap-1.5"><ImageIcon className="w-4 h-4 text-slate-600" /> Sourced Asset Priority Matrix</span>
-                    <span className="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-mono">Rule active</span>
+                    <span className="flex items-center gap-1.5"><ImageIcon className="w-4 h-4 text-slate-600" /> Image Search Order</span>
+                    <span className="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-mono">Active Rule</span>
                   </div>
                   
                   <div className="space-y-2 text-xs">
                     <div className="flex items-center gap-2 bg-white border border-slate-100 p-2 rounded-lg shadow-sm">
                       <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                       <div className="text-[11px] text-slate-600 font-medium">
-                        <strong>Step 1: Free Stock Verification API Lookup</strong>
-                        <p className="text-slate-400 mt-0.5 font-mono text-[10px]">Query: "{selectedGenerated.keywords?.[0] || 'Arctic'}" via Unsplash/Pexels endpoint hook.</p>
+                        <strong>Step 1: Check Free Stock Repositories First</strong>
+                        <p className="text-slate-400 mt-0.5 font-mono text-[10px]">Looking up keyword: "{selectedGenerated.keywords?.[0] || 'Arctic'}" on Unsplash/Pexels.</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 bg-white/40 border border-slate-100 p-2 rounded-lg">
                       <div className="w-2 h-2 rounded-full bg-slate-300"></div>
                       <div className="text-[11px] text-slate-400 font-medium">
-                        <strong>Step 2: AI Prompt generation Fallback</strong>
-                        <p className="text-[10px] mt-0.5 italic">Conditional fallback execution triggers only if match yields zero asset parameters[cite: 299, 303].</p>
+                        <strong>Step 2: Fallback to AI Image Generation</strong>
+                        <p className="text-[10px] mt-0.5 italic">An AI graphic will only be created if no suitable free stock photo matches the keyword.</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Estimated Output parameters</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Story Details</span>
                   <div className="grid grid-cols-2 gap-2 text-xs font-medium text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <div>📐 Target Outpost: <span className="text-slate-900 font-bold">{selectedGenerated.suggestedSite}</span></div>
-                    <div>📝 Word Estimate: <span className="text-slate-900 font-bold">~{selectedGenerated.wordCountEstimate} words</span> [cite: 449]</div>
+                    <div>🎯 Target Website: <span className="text-slate-900 font-bold">{selectedGenerated.suggestedSite}</span></div>
+                    <div>📝 Target Length: <span className="text-slate-900 font-bold">~{selectedGenerated.wordCountEstimate} words</span></div>
                   </div>
                 </div>
 
@@ -416,9 +480,9 @@ export default function ResearchPage() {
                     }`}
                   >
                     {simulatedExport === selectedGenerated.id ? (
-                      <>⚡ Brief Dispatched to Master Pipeline Logs!</>
+                      <>⚡ Brief Exported to Draft Queue!</>
                     ) : (
-                      <><Send className="w-3.5 h-3.5" /> Initialize Content Pipeline Handoff</>
+                      <><Send className="w-3.5 h-3.5" /> Send to Draft Queue</>
                     )}
                   </button>
                 </div>
@@ -426,7 +490,7 @@ export default function ResearchPage() {
             ) : (
               <div className="text-center py-12">
                 <Sparkles className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-xs text-slate-400 font-medium">Select an intelligence summary node</p>
+                <p className="text-xs text-slate-400 font-medium">Select a story suggestion to check settings</p>
               </div>
             )}
           </div>
@@ -438,29 +502,29 @@ export default function ResearchPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-base font-bold text-slate-900">Define Automated Tracking Vector</h3>
+              <h3 className="text-base font-bold text-slate-900">Add New Topic Tracking</h3>
               <button onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-slate-100 rounded-md transition-colors">
                 <X className="w-4 h-4 text-slate-400" />
               </button>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Topic Core Parameters</label>
-                <input type="text" placeholder="e.g., Akureyri Airport infrastructure adjustments" className="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-slate-900/10" />
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Topic / Target Subject</label>
+                <input type="text" placeholder="e.g., Akureyri Airport flights expansion" className="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-800 font-medium" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Domain Module</label>
-                  <select className="w-full mt-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none">
-                    <option>All Network Outposts</option>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Website</label>
+                  <select className="w-full mt-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none text-slate-700 font-medium">
+                    <option>All Managed Sites</option>
                     <option>Greenland Review</option>
                     <option>Nordic Current</option>
                     <option>Norway Review</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Triage Category</label>
-                  <select className="w-full mt-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Category</label>
+                  <select className="w-full mt-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none text-slate-700 font-medium">
                     <option>Policy</option>
                     <option>Tourism</option>
                     <option>Environment</option>
@@ -469,13 +533,13 @@ export default function ResearchPage() {
                 </div>
               </div>
               <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 text-[11px] text-blue-700 font-medium">
-                "System Note: Initializing this matrix triggers an automated background polling request across approved streams." [cite: 360]
+                "Note: Adding this topic instructs background system checks to scan incoming news alerts for matching factual references."
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
               <button onClick={() => setShowCreateModal(false)} className="px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
               <button onClick={handleGenerateDraft} disabled={isGenerating} className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center gap-1.5">
-                {isGenerating ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Analyzing Loops...</> : <><Brain className="w-3.5 h-3.5" /> Initialize Matrix Tracking</>}
+                {isGenerating ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Analyzing feeds...</> : <><Brain className="w-3.5 h-3.5" /> Start Topic Tracking</>}
               </button>
             </div>
           </div>
