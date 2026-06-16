@@ -1,24 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
-  CheckCircle2, Clock, AlertCircle, Send, Calendar, MessageSquare,
-  ChevronRight, Check, X, Image as ImageIcon, Link as LinkIcon,
-  Tag, FolderOpen, Loader2, ArrowRight, Eye, Edit3, ThumbsUp,
-  ThumbsDown, RotateCcw, ExternalLink, Search, Wand2, Facebook, 
-  Instagram, ClipboardList, Sparkles, Twitter, Linkedin
+  CheckCircle2, Clock, AlertCircle, Check, X, Image as ImageIcon,
+  FolderOpen, Calendar, MessageSquare, ChevronRight, Eye, Edit3,
+  Search, Wand2, Facebook, Instagram, Twitter, Linkedin, ClipboardList,
+  Sparkles, ThumbsUp, ThumbsDown, RotateCcw, ExternalLink, Tag
 } from "lucide-react";
-
-import { 
-  articles, 
-  sites, 
-  lifecycleStages, 
-  freeStockImages, 
-  aiGeneratedImages, 
-  imageSourceConfigs, 
-  socialTeaserTemplates, 
-  aiImagePromptTemplates 
+import {
+  articles,
+  sites,
+  lifecycleStages,
+  freeStockImages,
+  aiGeneratedImages,
+  imageSourceConfigs,
+  socialTeaserTemplates,
+  aiImagePromptTemplates
 } from "@/lib/mock-data";
 
 type StatusFilter = "all" | "pending_review" | "needs_changes" | "approved";
@@ -30,7 +27,6 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
 };
 
 export default function ReviewQueuePage() {
-  const router = useRouter();
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -48,18 +44,39 @@ export default function ReviewQueuePage() {
   const [scheduleTime, setScheduleTime] = useState("09:00");
   const [localArticles, setLocalArticles] = useState(articles);
   const [showSuccess, setShowSuccess] = useState<string | null>(null);
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({
+    headlineReviewed: false,
+    contentReviewed: false,
+    imageApproved: false,
+    linksVerified: false,
+    categoryAssigned: false,
+    tagsAdded: false,
+  });
 
   const reviewArticles = localArticles.filter(a => ["pending_review", "needs_changes", "approved"].includes(a.status));
-
   const filtered = reviewArticles.filter(a => {
     const matchesFilter = filter === "all" || a.status === filter;
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase()) || a.siteName.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
-
   const selected = localArticles.find(a => a.id === selectedId) || filtered[0] || null;
 
-  // Contextual Match for Image Prompts
+  const toggleChecklist = (id: string) => {
+    setChecklist(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const checklistItems = [
+    { id: "headlineReviewed", label: "Headline Reviewed" },
+    { id: "contentReviewed", label: "Content Reviewed" },
+    { id: "imageApproved", label: "Image Approved", checked: !!selected?.featuredImage },
+    { id: "linksVerified", label: "Links Verified" },
+    { id: "categoryAssigned", label: "Category Assigned", checked: !!selected?.category },
+    { id: "tagsAdded", label: "Tags Added", checked: selected?.tags.length > 0 },
+  ];
+
+  const completedChecks = checklistItems.filter(i => checklist[i.id] || i.checked).length;
+  const checklistProgress = Math.round((completedChecks / checklistItems.length) * 100);
+
   const currentPromptTemplate = aiImagePromptTemplates.find(t => t.category === selected?.category) || aiImagePromptTemplates[0];
 
   const handleApprove = () => {
@@ -121,18 +138,6 @@ export default function ReviewQueuePage() {
       setIsGeneratingImage(false);
     }, 1500);
   };
-
-  const checklistItems = [
-    { label: "Headline Reviewed", checked: selected?.lifecycle.history.some(h => h.stage === "review") || false },
-    { label: "Content Reviewed", checked: selected?.status === "approved" || selected?.status === "scheduled" || selected?.status === "published" },
-    { label: "Image Approved", checked: !!selected?.featuredImage },
-    { label: "Links Verified", checked: true },
-    { label: "SEO Metadata Set", checked: selected?.tags.length > 0 },
-    { label: "Category Assigned", checked: !!selected?.category },
-  ];
-
-  const completedChecks = checklistItems.filter(i => i.checked).length;
-  const checklistProgress = Math.round((completedChecks / checklistItems.length) * 100);
 
   return (
     <div className="space-y-4">
@@ -245,7 +250,7 @@ export default function ReviewQueuePage() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto p-5 space-y-5">
                 <input
                   type="text"
@@ -261,40 +266,10 @@ export default function ReviewQueuePage() {
                   <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{selected.body}</p>
                 </div>
 
-                {/* Inline System Connector Panel: Social Distribution Maps */}
-                <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-3">
-                  <div className="flex justify-between items-center border-b pb-2">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-blue-500" /> Multi-Channel Social Blueprints
-                    </h4>
-                    <span className="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-mono font-medium">Automatic Engine Trigger</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="p-3 bg-white border border-slate-100 rounded-lg space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                        <Twitter className="w-3.5 h-3.5 text-sky-500" />
-                        <span>Twitter Template Match</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 font-mono bg-slate-50 p-2 rounded">
-                        {selected.title} — Analysis live on {selected.siteName.toLowerCase().replace(/\s/g, "")}.is/feed
-                      </p>
-                    </div>
-                    <div className="p-3 bg-white border border-slate-100 rounded-lg space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                        <Linkedin className="w-3.5 h-3.5 text-blue-700" />
-                        <span>LinkedIn Rule Config</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 font-mono bg-slate-50 p-2 rounded truncate">
-                        📈 [{selected.category}] Insights on raw variables: {selected.excerpt.slice(0, 50)}...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content Lifecycle Tracker */}
+                {/* Content Lifecycle Tracker (Simplified) */}
                 <div className="p-4 bg-blue-50/30 rounded-xl border border-blue-100">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-semibold text-slate-900">Content Lifecycle Progress</h4>
+                    <h4 className="text-sm font-semibold text-slate-900">Publishing Progress</h4>
                     <span className="text-xs font-semibold text-blue-600">{selected.lifecycle.progress}% Complete</span>
                   </div>
                   <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden mb-3">
@@ -311,7 +286,7 @@ export default function ReviewQueuePage() {
                     {selected.status === "pending_review" && (
                       <div className="flex items-center gap-2 text-xs text-amber-600">
                         <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>Awaiting editorial review...</span>
+                        <span>Awaiting review...</span>
                       </div>
                     )}
                   </div>
@@ -323,7 +298,7 @@ export default function ReviewQueuePage() {
                 {selected.status === "pending_review" && (
                   <>
                     <button onClick={handleApprove} className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium flex items-center gap-2 transition-colors">
-                      <Check className="w-4 h-4" /> Approve Content
+                      <Check className="w-4 h-4" /> Approve
                     </button>
                     <button onClick={() => setShowChangesModal(true)} className="px-4 py-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-50 rounded-md text-sm font-medium flex items-center gap-2 transition-colors">
                       <MessageSquare className="w-4 h-4" /> Request Changes
@@ -335,19 +310,22 @@ export default function ReviewQueuePage() {
                     <button onClick={handleApprove} className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium flex items-center gap-2 transition-colors">
                       <Check className="w-4 h-4" /> Approve After Changes
                     </button>
-                    <span className="text-xs text-amber-600 font-medium ml-2">Author has been notified of requested changes</span>
+                    <span className="text-xs text-amber-600 font-medium ml-2">Author has been notified</span>
                   </>
                 )}
                 {selected.status === "approved" && (
                   <>
                     <button onClick={() => setShowScheduleModal(true)} className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium flex items-center gap-2 transition-colors">
-                      <Calendar className="w-4 h-4" /> Schedule Outbound
+                      <Calendar className="w-4 h-4" /> Schedule
                     </button>
                     <button onClick={() => setShowPublishModal(true)} className="px-4 py-2 bg-white border border-green-200 text-green-700 hover:bg-green-50 rounded-md text-sm font-medium flex items-center gap-2 transition-colors">
-                      <ExternalLink className="w-4 h-4" /> Publish Now
+                      Publish Now
                     </button>
                     <button onClick={() => setShowSocialModal(true)} className="px-4 py-2 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium flex items-center gap-2 transition-colors">
                       <Facebook className="w-4 h-4" /> Edit Teasers
+                    </button>
+                    <button onClick={handleReplaceImage} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-md text-sm font-medium flex items-center gap-2 transition-colors">
+                      <ImageIcon className="w-4 h-4" /> Replace Image
                     </button>
                   </>
                 )}
@@ -366,7 +344,7 @@ export default function ReviewQueuePage() {
         {/* Right: Metadata Panel */}
         <div className="lg:col-span-3 card bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col shadow-sm">
           <div className="p-3 border-b border-slate-100 bg-slate-50/50">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Publishing Intelligence</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Article Details</p>
           </div>
           {selected ? (
             <div className="flex-1 overflow-y-auto p-4 space-y-5">
@@ -380,14 +358,17 @@ export default function ReviewQueuePage() {
                   <div className="h-full bg-green-500 rounded-full" style={{ width: `${checklistProgress}%` }} />
                 </div>
                 <div className="space-y-2">
-                  {checklistItems.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-                        item.checked ? "bg-green-500 border-green-500" : "border-slate-300"
-                      }`}>
-                        {item.checked && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                      <span className={`text-xs ${item.checked ? "text-slate-500 line-through" : "text-slate-700"}`}>
+                  {checklistItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleChecklist(item.id)}
+                        className={`w-4 h-4 rounded border flex items-center justify-center ${
+                          checklist[item.id] || item.checked ? "bg-green-500 border-green-500" : "border-slate-300"
+                        }`}
+                      >
+                        {checklist[item.id] || item.checked ? <Check className="w-3 h-3 text-white" /> : null}
+                      </button>
+                      <span className={`text-xs ${checklist[item.id] || item.checked ? "text-slate-500 line-through" : "text-slate-700"}`}>
                         {item.label}
                       </span>
                     </div>
@@ -395,29 +376,20 @@ export default function ReviewQueuePage() {
                 </div>
               </div>
 
-              {/* Featured Image Workspace & Inline Prompt Logic */}
+              {/* Featured Image */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium text-slate-900">Active Featured Asset</h4>
-                  <button 
-                    onClick={handleReplaceImage}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                  >
-                    <ImageIcon className="w-3 h-3" /> Swap Source
+                  <h4 className="text-sm font-medium text-slate-900">Featured Image</h4>
+                  <button onClick={handleReplaceImage} className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+                    <ImageIcon className="w-3 h-3" /> Replace
                   </button>
                 </div>
                 <div className="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
-                  <img src={selected.featuredImage} alt="Featured asset context" className="w-full h-32 object-cover" />
+                  <img src={selected.featuredImage} alt="Featured image" className="w-full h-32 object-cover" />
                 </div>
-                
-                {/* Inline Generation Prompt Map */}
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600 space-y-1">
-                  <span className="font-bold text-slate-400 block uppercase tracking-tight text-[9px]">Contextual Image Engine Preset</span>
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600">
+                  <span className="font-bold text-slate-400 block uppercase tracking-tight text-[9px]">Image Context</span>
                   <p className="italic font-sans leading-tight text-slate-700">"{currentPromptTemplate.template.replace("{{subject}}", selected.category)}"</p>
-                  <div className="flex justify-between items-center pt-1 text-[10px] font-mono text-slate-400">
-                    <span>Engine: Midjourney v6</span>
-                    <span>Ratio: {currentPromptTemplate.aspectRatio}</span>
-                  </div>
                 </div>
               </div>
 
@@ -450,36 +422,33 @@ export default function ReviewQueuePage() {
                 </div>
               </div>
 
-              {/* Editorial Suggestions */}
-              <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100">
-                <h4 className="text-xs font-bold text-amber-800 mb-2 flex items-center gap-1 uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3 text-amber-600" /> Real-time System Advice
-                </h4>
+              {/* Editorial Notes */}
+              <div className="p-3 bg-blue-50/30 rounded-xl border border-blue-100">
+                <h4 className="text-xs font-bold text-blue-800 mb-2">Editorial Notes</h4>
                 <ul className="space-y-1.5">
-                  <li className="text-[11px] text-amber-800 flex items-start gap-1.5">
-                    <ChevronRight className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                    Optimal distribution detected via <strong>{selected.siteName}</strong> profiles.
+                  <li className="text-[11px] text-blue-800">
+                    Consider adding a subheading for better readability.
                   </li>
-                  <li className="text-[11px] text-amber-800 flex items-start gap-1.5">
-                    <ChevronRight className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                    Image match configuration meets clean tech layout standards.
+                  <li className="text-[11px] text-blue-800">
+                    Featured image meets {selected.category} standards.
                   </li>
                 </ul>
               </div>
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center text-center p-8">
-              <p className="text-sm text-slate-400">Select an article to view metadata</p>
+              <p className="text-sm text-slate-400">Select an article to view details</p>
             </div>
           )}
         </div>
       </div>
 
+      {/* Modals (All Restored with Clean Language) */}
       {/* Schedule Modal */}
       {showScheduleModal && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Schedule Outbound Distribution</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Schedule Article</h3>
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-700">Date</label>
@@ -490,13 +459,15 @@ export default function ReviewQueuePage() {
                 <input type="time" value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)} className="w-full mt-1 p-2 border border-slate-200 rounded-md text-sm" />
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-700">Publishing Domain Target</label>
-                <p className="text-sm text-slate-500 mt-1 font-medium">{selected.siteName} ({selected.siteId}.is)</p>
+                <label className="text-sm font-medium text-slate-700">Publish to</label>
+                <p className="text-sm text-slate-500 mt-1 font-medium">{selected.siteName}</p>
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 mt-6">
               <button onClick={() => setShowScheduleModal(false)} className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Cancel</button>
-              <button onClick={handleSchedule} disabled={!scheduleDate} className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium disabled:opacity-50">Confirm Engine Schedule</button>
+              <button onClick={handleSchedule} disabled={!scheduleDate} className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium disabled:opacity-50">
+                Schedule
+              </button>
             </div>
           </div>
         </div>
@@ -506,19 +477,21 @@ export default function ReviewQueuePage() {
       {showChangesModal && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Request Content Revisions</h3>
-            <p className="text-sm text-slate-500 mb-3">Target Blueprint: <span className="text-slate-700 font-semibold">{selected.title}</span></p>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Request Changes</h3>
+            <p className="text-sm text-slate-500 mb-3">
+              Article: <span className="text-slate-700 font-semibold">{selected.title}</span>
+            </p>
             <textarea
               value={changesNote}
               onChange={(e) => setChangesNote(e.target.value)}
-              placeholder="Describe line updates, structural tweaks or source confirmations required..."
+              placeholder="Describe the changes needed..."
               rows={4}
               className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-slate-900 resize-none"
             />
             <div className="flex items-center justify-end gap-2 mt-4">
               <button onClick={() => setShowChangesModal(false)} className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Cancel</button>
               <button onClick={handleRequestChanges} disabled={!changesNote.trim()} className="px-4 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100/70 rounded-md text-sm font-medium disabled:opacity-50">
-                Return to Workspace
+                Request Changes
               </button>
             </div>
           </div>
@@ -531,46 +504,34 @@ export default function ReviewQueuePage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b pb-3">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">Image Asset Pool Sourcing</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Contextual Category Focus: {selected.category}</p>
+                <h3 className="text-lg font-semibold text-slate-900">Replace Featured Image</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Category: {selected.category}</p>
               </div>
               <button onClick={() => setShowImageModal(false)} className="p-1.5 hover:bg-slate-100 rounded-md">
                 <X className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Active Connected Sources Grid Status */}
-            <div className="grid grid-cols-3 gap-2 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100 text-[10px]">
-              {imageSourceConfigs.slice(0, 3).map(cfg => (
-                <div key={cfg.id} className="flex justify-between items-center bg-white p-1.5 border border-slate-200/60 rounded">
-                  <span className="font-medium text-slate-700">{cfg.name}</span>
-                  <span className="text-emerald-600 font-mono">Connected</span>
-                </div>
-              ))}
-            </div>
-
             <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5 mb-4 w-fit">
               <button
                 onClick={() => setImageTab("free")}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md ${imageTab === "free" ? "bg-white shadow-xs text-slate-900" : "text-slate-500"}`}
               >
-                Free Stock Photos Pool
+                Free Stock Images
               </button>
               <button
                 onClick={() => setImageTab("ai")}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md ${imageTab === "ai" ? "bg-white shadow-xs text-slate-900" : "text-slate-500"}`}
               >
-                AI Generation Matrix
+                Generate Image
               </button>
             </div>
-
             {imageTab === "free" && (
               <div className="space-y-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Query open repositories..."
+                    placeholder="Search images..."
                     className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-md text-sm focus:outline-none"
                   />
                 </div>
@@ -589,41 +550,33 @@ export default function ReviewQueuePage() {
                           <Check className="w-3 h-3 text-white" />
                         </div>
                       )}
-                      <div className="absolute bottom-0 left-0 right-0 bg-slate-900/70 p-1 truncate text-left">
-                        <span className="text-[9px] text-white font-medium">{img.title}</span>
-                      </div>
                     </button>
                   ))}
                 </div>
               </div>
             )}
-
             {imageTab === "ai" && (
               <div className="space-y-4">
                 {isGeneratingImage ? (
                   <div className="flex flex-col items-center justify-center py-12 border border-dashed border-slate-200 rounded-xl bg-slate-50">
                     <Loader2 className="w-8 h-8 text-slate-800 animate-spin mb-3" />
-                    <p className="text-xs font-semibold text-slate-600">Executing Midjourney Matrix API...</p>
+                    <p className="text-xs font-semibold text-slate-600">Generating images...</p>
                     <p className="text-[11px] text-slate-400 mt-1 max-w-sm text-center italic">"{currentPromptTemplate.template.replace("{{subject}}", selected.category)}"</p>
                   </div>
                 ) : generatedImages.length === 0 ? (
                   <div className="text-center py-10 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
                     <Wand2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <h4 className="text-sm font-semibold text-slate-700">Synthesize Custom Visual Asset</h4>
-                    <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Generate a matching asset using parameters configured for the {selected.category} profile template.</p>
+                    <h4 className="text-sm font-semibold text-slate-700">Generate Custom Image</h4>
+                    <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Create a custom image for this article.</p>
                     <button
                       onClick={handleGenerateAIImagesInReview}
                       className="mt-4 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium flex items-center gap-2 mx-auto transition-colors"
                     >
-                      <Wand2 className="w-3.5 h-3.5" /> Initialize Engine Run
+                      <Wand2 className="w-3.5 h-3.5" /> Generate
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight block">Active Prompt Signature</span>
-                      <p className="text-xs text-slate-700 mt-0.5 italic">"{currentPromptTemplate.template.replace("{{subject}}", selected.category)}"</p>
-                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       {generatedImages.map((img) => (
                         <button
@@ -633,15 +586,12 @@ export default function ReviewQueuePage() {
                             selectedReplacementImage === img.url ? "border-slate-900" : "border-transparent"
                           }`}
                         >
-                          <img src={img.thumbnail || img.url} alt="AI Generated Engine Frame" className="w-full h-28 object-cover" />
+                          <img src={img.thumbnail || img.url} alt="Generated image" className="w-full h-28 object-cover" />
                           {selectedReplacementImage === img.url && (
                             <div className="absolute top-1 right-1 w-5 h-5 bg-slate-900 rounded-full flex items-center justify-center">
                               <Check className="w-3 h-3 text-white" />
                             </div>
                           )}
-                          <div className="absolute bottom-0 left-0 right-0 bg-slate-900/80 p-1 text-left">
-                            <p className="text-[9px] text-white font-medium uppercase tracking-wider">Engine Pass Checked</p>
-                          </div>
                         </button>
                       ))}
                     </div>
@@ -649,48 +599,44 @@ export default function ReviewQueuePage() {
                       onClick={handleGenerateAIImagesInReview}
                       className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 w-full rounded-md text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
                     >
-                      <Wand2 className="w-3.5 h-3.5" /> Re-roll Generation
+                      <Wand2 className="w-3.5 h-3.5" /> Generate More
                     </button>
                   </div>
                 )}
               </div>
             )}
-
             <div className="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-slate-100">
               <button onClick={() => setShowImageModal(false)} className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Cancel</button>
-              <button 
+              <button
                 onClick={handleConfirmImageReplace}
                 disabled={!selectedReplacementImage}
                 className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
               >
-                <Check className="w-4 h-4" /> Bind Asset to Article
+                <Check className="w-4 h-4" /> Replace Image
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Social Teaser Customization Modal */}
+      {/* Social Teaser Modal */}
       {showSocialModal && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-4 border-b pb-3">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">Social Teasers Configurator</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Review and override structural variables</p>
+                <h3 className="text-lg font-semibold text-slate-900">Edit Social Media Teasers</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Customize posts for each platform</p>
               </div>
               <button onClick={() => setShowSocialModal(false)} className="p-1.5 hover:bg-slate-100 rounded-md">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            
-            {/* Template Multi-Channel Status Details */}
             <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
               <div className="p-2.5 bg-slate-50 rounded-lg text-xs font-medium text-slate-600 border border-slate-100">
-                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Parent Context Record</span>
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Article</span>
                 {selected.title}
               </div>
-
               <div className="space-y-3">
                 {socialTeaserTemplates.slice(0, 3).map((tmpl) => (
                   <div key={tmpl.id} className="p-3 border border-slate-200 rounded-xl bg-white space-y-2">
@@ -702,12 +648,12 @@ export default function ReviewQueuePage() {
                         {tmpl.platform === "linkedin" && <Linkedin className="w-3.5 h-3.5 text-blue-800" />}
                         {tmpl.name}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400">Limit: {tmpl.maxLength} chars</span>
+                      <span className="text-[10px] font-mono text-slate-400">Max: {tmpl.maxLength} chars</span>
                     </div>
                     <textarea
                       defaultValue={
-                        tmpl.platform === "twitter" 
-                          ? `${selected.title} — Live metrics via ${selected.siteName.toLowerCase().replace(/\s/g, "")}.is/feed`
+                        tmpl.platform === "twitter"
+                          ? `${selected.title} — Live on ${selected.siteName.toLowerCase().replace(/\s/g, "")}.is/feed`
                           : `${selected.title}\n\n${selected.excerpt.slice(0, 100)}...\n\n#arctic #nordic #${selected.category.toLowerCase()}`
                       }
                       rows={2}
@@ -717,14 +663,13 @@ export default function ReviewQueuePage() {
                 ))}
               </div>
             </div>
-
             <div className="flex items-center justify-end gap-2 mt-6 pt-3 border-t border-slate-100">
               <button onClick={() => setShowSocialModal(false)} className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Cancel</button>
-              <button 
-                onClick={() => { setShowSocialModal(false); setShowSuccess("Social distribution blueprints synced with database rules"); setTimeout(() => setShowSuccess(null), 3000); }}
+              <button
+                onClick={() => { setShowSocialModal(false); setShowSuccess("Social teasers updated"); setTimeout(() => setShowSuccess(null), 3000); }}
                 className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
               >
-                <Check className="w-4 h-4" /> Save Distribution Rules
+                <Check className="w-4 h-4" /> Save Changes
               </button>
             </div>
           </div>
@@ -735,16 +680,15 @@ export default function ReviewQueuePage() {
       {showPublishModal && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Confirm Instant Publication</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Publish Now</h3>
             <p className="text-sm text-slate-500 mb-4 leading-relaxed">
-              This action bypasses the queue to push <span className="text-slate-700 font-semibold">{selected.title}</span> live onto the active cluster: <span className="font-semibold text-slate-800">{selected.siteName}</span>.
+              This will publish <span className="text-slate-700 font-semibold">{selected.title}</span> immediately to <span className="font-semibold text-slate-800">{selected.siteName}</span>.
             </p>
-            <div className="p-3 bg-amber-50 rounded-lg border border-amber-100 mb-4">
-              <p className="text-xs text-amber-700 font-medium">Warning: Production sync is immediate. Cache purge will execute automatically across edge networks.</p>
-            </div>
             <div className="flex items-center justify-end gap-2">
               <button onClick={() => setShowPublishModal(false)} className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Cancel</button>
-              <button onClick={handlePublishNow} className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors">Execute Production Push</button>
+              <button onClick={handlePublishNow} className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors">
+                Publish
+              </button>
             </div>
           </div>
         </div>
