@@ -5,7 +5,7 @@ import {
   CheckCircle2, Clock, AlertCircle, Check, X, Image as ImageIcon,
   FolderOpen, Calendar, MessageSquare, ChevronRight, Eye, Edit3,
   Search, Wand2, Facebook, Instagram, Twitter, Linkedin, ClipboardList,
-  Sparkles, ThumbsUp, ThumbsDown, RotateCcw, ExternalLink, Tag
+  Sparkles, ThumbsUp, ThumbsDown, RotateCcw, ExternalLink, Tag, Loader2
 } from "lucide-react";
 import {
   articles,
