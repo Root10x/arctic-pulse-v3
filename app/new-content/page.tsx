@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   FileText, Link, ClipboardPaste, Upload, Send, Save, Clock,
   CheckCircle2, ArrowRight, Check, Image as ImageIcon, Search,
-  Camera, Download, X, Loader2
+  Camera, X, Loader2, Calendar, ExternalLink
 } from "lucide-react";
 import { sites, freeStockImages, aiGeneratedImages } from "@/lib/mock-data";
+import { useDraftStore } from "@/lib/stores/draftStore";
+
+// Mock data for backlinks (replace with real data in production)
+const mockArticlesForBacklinks = [
+  { id: "1", title: "Arctic Council Convenes in Tromsø", siteName: "Greenland Review" },
+  { id: "2", title: "Greenland Unveils Mineral Policy", siteName: "Norway Review" },
+  { id: "3", title: "Northern Lights Tourism Booms", siteName: "Iceland Review" },
+];
 
 const inputMethods = [
   { id: "topic", label: "Topic", icon: FileText, desc: "Enter a headline and notes" },
@@ -18,6 +26,7 @@ const inputMethods = [
 
 const mockDrafts = [
   {
+    id: "1",
     title: "Arctic Council Convenes in Tromsø for Shipping Safety Summit",
     excerpt: "The Arctic Council convenes this week in Tromsø to discuss new shipping regulations as ice melt opens northern passages...",
     body: "The Arctic Council convenes this week in Tromsø to discuss new shipping regulations as ice melt opens northern passages. Delegates from all eight member states will review environmental protocols and safety standards for vessels navigating increasingly accessible Arctic waters.\n\nThe proposed regulations address ice-class certification requirements, mandatory satellite tracking for all commercial vessels, and updated environmental protection measures. Norway and Denmark are pushing for stricter enforcement mechanisms, while Russia advocates for voluntary compliance frameworks.\n\nShipping traffic through the Northern Sea Route has increased 40% year-over-year, prompting concerns about search and rescue capabilities and pollution response readiness in remote Arctic waters.",
@@ -28,8 +37,12 @@ const mockDrafts = [
       "https://picsum.photos/seed/ship2/400/300",
       "https://picsum.photos/seed/ship3/400/300",
     ],
+    siteId: "gr",
+    siteName: "Greenland Review",
+    siteUrl: "greenlandreview.is",
   },
   {
+    id: "2",
     title: "Greenland Unveils Strict Mineral Extraction Policy Framework",
     excerpt: "Greenland's new mineral extraction policy aims to balance economic development with environmental protection...",
     body: "Greenland's parliament has approved a comprehensive mineral extraction policy that establishes strict environmental oversight for mining operations across the autonomous territory. The framework introduces mandatory environmental bonds, community consent requirements, and enhanced monitoring of sensitive ecological zones.\n\nThe policy specifically targets rare earth mining operations, which have attracted significant international investment interest. Chinese and Australian mining firms are actively lobbying for exemptions to certain provisions, arguing that the new requirements could delay project timelines by 18-24 months.\n\nEnvironmental advocates have praised the framework for prioritizing indigenous hunting grounds and protecting critical habitats. The policy also establishes a revenue-sharing model that directs 30% of mining royalties to local communities.",
@@ -40,21 +53,33 @@ const mockDrafts = [
       "https://picsum.photos/seed/mine2/400/300",
       "https://picsum.photos/seed/mine3/400/300",
     ],
+    siteId: "no",
+    siteName: "Norway Review",
+    siteUrl: "norwayreview.no",
   },
 ];
 
 export default function NewContentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const addDraft = useDraftStore((state) => state.addDraft);
+
+  // State for input methods
   const [method, setMethod] = useState("topic");
   const [headline, setHeadline] = useState("");
   const [notes, setNotes] = useState("");
   const [targetSite, setTargetSite] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [pastedContent, setPastedContent] = useState("");
+  const [backlink, setBacklink] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [draft, setDraft] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvPreview, setCsvPreview] = useState<string[]>([]);
+
+  // State for image selection
   const [imageSearchQuery, setImageSearchQuery] = useState("");
   const [imageTab, setImageTab] = useState<"free" | "generated">("free");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -62,7 +87,18 @@ export default function NewContentPage() {
   const [generatedImages, setGeneratedImages] = useState<typeof aiGeneratedImages>([]);
   const [showImageModal, setShowImageModal] = useState(false);
 
+  // State for scheduling
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("09:00");
+
+  // Generate mock draft
   const handleGenerate = () => {
+    if (!targetSite) {
+      alert("Please select a target site");
+      return;
+    }
+
     setIsGenerating(true);
     setProgress(0);
     const interval = setInterval(() => {
@@ -70,7 +106,15 @@ export default function NewContentPage() {
         if (prev >= 100) {
           clearInterval(interval);
           setIsGenerating(false);
-          setDraft(mockDrafts[Math.floor(Math.random() * mockDrafts.length)]);
+          const randomDraft = mockDrafts[Math.floor(Math.random() * mockDrafts.length)];
+          setDraft({
+            ...randomDraft,
+            siteId: targetSite,
+            siteName: sites.find((s) => s.id === targetSite)?.name || "",
+            siteUrl: sites.find((s) => s.id === targetSite)?.url || "",
+            featuredImage: selectedImage || randomDraft.suggestedImages[0],
+            backlink: backlink,
+          });
           return 100;
         }
         return prev + Math.floor(Math.random() * 15) + 5;
@@ -78,11 +122,46 @@ export default function NewContentPage() {
     }, 300);
   };
 
+  // Send to Review Queue (connected to pipeline)
   const handleSendToReview = () => {
+    if (!draft) return;
+
+    // Add to global store
+    addDraft({
+      ...draft,
+      status: "pending_review",
+      featuredImage: selectedImage || draft.suggestedImages[0],
+      backlink: backlink,
+    });
+
     setShowSuccess(true);
-    setTimeout(() => router.push("/review-queue"), 2000);
+    setTimeout(() => {
+      router.push("/review-queue");
+      setShowSuccess(false);
+    }, 2000);
   };
 
+  // Schedule draft
+  const handleSchedule = () => {
+    if (!draft || !scheduleDate) return;
+
+    addDraft({
+      ...draft,
+      status: "scheduled",
+      scheduledAt: new Date(`${scheduleDate}T${scheduleTime}`).toISOString(),
+      featuredImage: selectedImage || draft.suggestedImages[0],
+      backlink: backlink,
+    });
+
+    setShowSuccess(true);
+    setShowScheduleModal(false);
+    setTimeout(() => {
+      setShowSuccess(false);
+      router.push("/review-queue");
+    }, 2000);
+  };
+
+  // Image selection
   const handleSelectImage = (imageUrl: string) => {
     setSelectedImage(imageUrl);
   };
@@ -96,9 +175,35 @@ export default function NewContentPage() {
     }, 2000);
   };
 
+  // CSV upload
+  const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      setCsvFile(file);
+
+      // Simulate CSV parsing
+      setTimeout(() => {
+        const preview = [
+          "Title, Body, Site, Category",
+          `${file.name.replace(".csv", "")}, Sample body content, ${sites[0].name}, News`,
+          "Another Article, More content here, ${sites[1].name}, Travel",
+        ];
+        setCsvPreview(preview);
+      }, 500);
+    }
+  };
+
+  // Save draft
   const handleSaveDraft = () => {
+    if (!draft) return;
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  // Get site URL for preview
+  const getSiteUrl = (siteId: string) => {
+    const site = sites.find((s) => s.id === siteId);
+    return site ? `https://${site.url}` : "Select a site";
   };
 
   return (
@@ -129,10 +234,10 @@ export default function NewContentPage() {
 
       {/* Publishing Progress Bar */}
       {draft && (
-        <div className="card p-4 bg-blue-50/50 border-blue-200">
+        <div className="card p-4 bg-slate-50 border-slate-200">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-slate-900">Publishing Progress</h3>
-            <span className="text-xs text-blue-600 font-medium">Draft Created</span>
+            <span className="text-xs text-slate-600 font-medium">Draft Created</span>
           </div>
           <div className="flex items-center gap-1">
             {[
@@ -142,9 +247,11 @@ export default function NewContentPage() {
             ].map((step, i) => (
               <div key={i} className="flex items-center flex-1">
                 <div className={`flex flex-col items-center flex-1 ${step.done ? "opacity-100" : "opacity-40"}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                    step.done ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500"
-                  }`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                      step.done ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
                     {step.done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
                   </div>
                   <span className="text-[10px] text-slate-500 mt-1">{step.label}</span>
@@ -176,7 +283,9 @@ export default function NewContentPage() {
                   >
                     <Icon className={`w-4 h-4 ${method === m.id ? "text-slate-900" : "text-slate-400"}`} />
                     <div>
-                      <p className={`text-sm font-medium ${method === m.id ? "text-slate-900" : "text-slate-700"}`}>{m.label}</p>
+                      <p className={`text-sm font-medium ${method === m.id ? "text-slate-900" : "text-slate-700"}`}>
+                        {m.label}
+                      </p>
                       <p className="text-xs text-slate-400">{m.desc}</p>
                     </div>
                   </button>
@@ -237,11 +346,41 @@ export default function NewContentPage() {
               </div>
             )}
             {method === "bulk" && (
-              <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center">
+              <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center">
                 <Upload className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                 <p className="text-sm text-slate-500">Drop CSV file here or click to browse</p>
-                <p className="text-xs text-slate-400 mt-1">Supports .csv with columns: title, body, site, category</p>
-                <button className="btn-secondary mt-3">Select File</button>
+                <p className="text-xs text-slate-400 mt-1">
+                  Format: <code className="bg-slate-100 px-1 rounded">Title, Body, Site, Category</code>
+                </p>
+                <p className="text-xs text-slate-400">
+                  Example: <a href="/sample.csv" className="text-blue-600">Download sample CSV</a>
+                </p>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleCsvUpload}
+                  className="mt-4 opacity-0 absolute"
+                  id="csv-upload"
+                />
+                <label htmlFor="csv-upload" className="btn-secondary mt-3 cursor-pointer">
+                  Select File
+                </label>
+                {csvFile && (
+                  <>
+                    <p className="text-sm text-slate-600 mt-2">
+                      <Check className="w-4 h-4 inline text-green-500 mr-1" />
+                      {csvFile.name} selected
+                    </p>
+                    {csvPreview.length > 0 && (
+                      <div className="mt-4 text-left">
+                        <p className="text-xs font-medium text-slate-500 mb-1">Preview:</p>
+                        <pre className="bg-slate-50 p-2 rounded text-xs overflow-x-auto">
+                          {csvPreview.join("\n")}
+                        </pre>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
             <div>
@@ -253,10 +392,33 @@ export default function NewContentPage() {
               >
                 <option value="">Select a site...</option>
                 {sites.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
                 ))}
               </select>
             </div>
+
+            {/* Backlink Field */}
+            <div>
+              <label className="text-sm font-medium text-slate-700">
+                Link to Related Article (Optional)
+              </label>
+              <select
+                value={backlink}
+                onChange={(e) => setBacklink(e.target.value)}
+                className="input w-full mt-1"
+              >
+                <option value="">Select a related article...</option>
+                {mockArticlesForBacklinks.map((article) => (
+                  <option key={article.id} value={article.id}>
+                    {article.title} ({article.siteName})
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-400 mt-1">Improves SEO and reader engagement</p>
+            </div>
+
             <button
               onClick={handleGenerate}
               disabled={isGenerating || (!headline && !sourceUrl && !pastedContent && method !== "bulk")}
@@ -305,6 +467,16 @@ export default function NewContentPage() {
           )}
           {draft && (
             <div className="card p-5 space-y-5">
+              {/* WordPress Publishing Confirmation */}
+              {targetSite && (
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-xs text-slate-500">
+                    <ExternalLink className="w-3 h-3 inline mr-1" />
+                    Will publish to: <span className="font-medium text-slate-700">{getSiteUrl(targetSite)}</span>
+                  </p>
+                </div>
+              )}
+
               {/* Draft Content */}
               <div>
                 <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Article Title</label>
@@ -321,10 +493,27 @@ export default function NewContentPage() {
                 </div>
               </div>
 
+              {/* Suggested Images in Preview */}
+              <div>
+                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Suggested Images</label>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {draft.suggestedImages?.map((img: string, index: number) => (
+                    <img
+                      key={index}
+                      src={img}
+                      alt={`Suggested ${index + 1}`}
+                      className="rounded-lg h-20 object-cover"
+                    />
+                  ))}
+                </div>
+              </div>
+
               {/* Suggested Categories & Tags */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Suggested Categories</label>
+                  <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    Suggested Categories
+                  </label>
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {draft.suggestedCategories.map((cat: string) => (
                       <span key={cat} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md">
@@ -334,7 +523,9 @@ export default function NewContentPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Suggested Tags</label>
+                  <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    Suggested Tags
+                  </label>
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {draft.suggestedTags.map((tag: string) => (
                       <span key={tag} className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-md">
@@ -381,7 +572,7 @@ export default function NewContentPage() {
                         value={imageSearchQuery}
                         onChange={(e) => setImageSearchQuery(e.target.value)}
                         placeholder="Search free stock photos..."
-                        className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -468,23 +659,17 @@ export default function NewContentPage() {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
-                <button
-                  onClick={handleSendToReview}
-                  className="btn-primary flex items-center gap-2"
-                >
+                <button onClick={handleSendToReview} className="btn-primary flex items-center gap-2">
                   <Send className="w-4 h-4" />
                   Send to Review
                 </button>
-                <button
-                  onClick={handleSaveDraft}
-                  className="btn-secondary flex items-center gap-2"
-                >
+                <button onClick={() => setShowScheduleModal(true)} className="btn-secondary flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Schedule
+                </button>
+                <button onClick={handleSaveDraft} className="btn-secondary flex items-center gap-2">
                   <Save className="w-4 h-4" />
                   Save Draft
-                </button>
-                <button className="btn-secondary flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Schedule
                 </button>
               </div>
               <p className="text-xs text-slate-400">
@@ -495,6 +680,51 @@ export default function NewContentPage() {
           )}
         </div>
       </div>
+
+      {/* Schedule Modal */}
+      {showScheduleModal && draft && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Schedule Article</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700">Article</label>
+                <p className="text-sm text-slate-600 mt-1">{draft.title}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Publish to</label>
+                <p className="text-sm text-slate-600 mt-1">{getSiteUrl(targetSite)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Date</label>
+                <input
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                  className="input w-full mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Time</label>
+                <input
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                  className="input w-full mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 mt-6">
+              <button onClick={() => setShowScheduleModal(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button onClick={handleSchedule} disabled={!scheduleDate} className="btn-primary">
+                Schedule
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
